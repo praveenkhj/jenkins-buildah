@@ -19,7 +19,6 @@ spec:
     - name: varlibcontainers
 ''' ) {
 node(POD_LABEL) {
-  stages {
     stage('Build with Buildah') {
       steps {
         container('buildah') {
@@ -35,7 +34,5 @@ node(POD_LABEL) {
         }
       }
     }
-
-  }
 }
 }
