@@ -1,0 +1,41 @@
+podTemplate(yaml: '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: buildah
+spec:
+  containers:
+  - name: buildah
+    image: quay.io/buildah/stable:v1.23.1
+    command:
+    - cat
+    tty: true
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: varlibcontainers
+        mountPath: /var/lib/containers
+  volumes:
+    - name: varlibcontainers
+''' ) {
+node(POD_LABEL) {
+  stages {
+    stage('Build with Buildah') {
+      steps {
+        container('buildah') {
+          sh 'buildah build -t praveenhpk/jenkins-example-buildah:8.5-230 .'
+        }
+      }
+    }
+
+    stage('tag image') {
+      steps {
+        container('buildah') {
+          sh 'buildah tag praveenhpk/jenkins-example-buildah:8.5-230 praveenhpk/jenkins-example-buildah:latest'
+        }
+      }
+    }
+
+  }
+}
+}
