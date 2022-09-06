@@ -20,19 +20,17 @@ spec:
 ''' ) {
 node(POD_LABEL) {
     stage('Build with Buildah') {
-      steps {
         container('buildah') {
+          echo POD_CONTAINER
           sh 'buildah build -t praveenhpk/jenkins-example-buildah:8.5-230 .'
         }
-      }
     }
 
     stage('tag image') {
-      steps {
         container('buildah') {
+          echo POD_CONTAINER
           sh 'buildah tag praveenhpk/jenkins-example-buildah:8.5-230 praveenhpk/jenkins-example-buildah:latest'
         }
       }
-    }
 }
 }
