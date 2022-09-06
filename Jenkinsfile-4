@@ -19,6 +19,9 @@ spec:
     - name: varlibcontainers
 ''' ) {
 node(POD_LABEL) {
+    stage('Checkout') {
+        git credentialsId: 'GitHub', url: 'https://github.com/praveenkhj/jenkins-buildah.git', branch: 'main'
+    }
     stage('Build with Buildah') {
         container('buildah') {
           echo POD_CONTAINER

@@ -1,0 +1,70 @@
+// Parameters for the build
+properties([
+  parameters([
+     //booleanParam(name: 'DEPLOY_SHA', defaultValue: false),
+     string(defaultValue: 'https://github.com/praveenkhj/testproject.git', name: 'repoURL'),
+     string(defaultValue: 'main', name: 'branch'),
+     string(defaultValue: 'docker.io', name: 'registry')
+  ])
+])
+
+podTemplate(yaml: '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: buildah
+spec:
+  containers:
+  - name: buildah
+    image: quay.io/buildah/stable:v1.23.1
+    command:
+    - cat
+    tty: true
+    securityContext:
+      privileged: true
+    volumeMounts:
+      - name: varlibcontainers
+        mountPath: /var/lib/containers
+  volumes:
+    - name: varlibcontainers
+''' ) {
+node(POD_LABEL) {
+  try {
+    stage('Checkout') {
+        git credentialsId: 'GitHub', url: repoURL, branch: branch
+    }
+    stage('Build with Buildah') {
+        container('buildah') {
+          echo POD_CONTAINER
+          sh 'buildah build -t praveenhpk/jenkins-example-buildah:8.5-230 .'
+        }
+    }
+
+    stage('tag image') {
+        container('buildah') {
+          echo POD_CONTAINER
+          sh 'buildah tag praveenhpk/jenkins-example-buildah:8.5-230 praveenhpk/jenkins-example-buildah:latest'
+        }
+    }
+    stage('Login to Docker Hub') {
+      withCredentials([usernamePassword(
+                   credentialsId: 'dh-creds',
+                   usernameVariable: 'USER',
+                   passwordVariable: 'PASSWORD'
+               )]) {
+      sh 'echo user "$USER" pasword "$PASSWORD"' 
+        container('buildah') {
+          sh 'echo $PASSWORD| buildah login -u $USER --password-stdin ${registry}'
+        }
+      }
+    }
+  } catch(err) {
+    echo 'Err: Build failed with Error: ' + err.toString()
+    throw err
+  } finally {
+      container('buildah') {
+        sh 'buildah logout ${registry}'
+      }
+  }
+}
+}
