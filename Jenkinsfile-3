@@ -35,7 +35,7 @@ spec:
     stage('Build with Buildah') {
       steps {
         container('buildah') {
-          sh 'buildah build -t darinpope/jenkins-example-buildah:8.5-230 .'
+          sh 'buildah build -t praveenhpk/jenkins-example-buildah:8.5-230 .'
         }
       }
     }
@@ -49,15 +49,15 @@ spec:
     stage('tag image') {
       steps {
         container('buildah') {
-          sh 'buildah tag darinpope/jenkins-example-buildah:8.5-230 darinpope/jenkins-example-buildah:latest'
+          sh 'buildah tag praveenhpk/jenkins-example-buildah:8.5-230 praveenhpk/jenkins-example-buildah:latest'
         }
       }
     }
     stage('push image') {
       steps {
         container('buildah') {
-          sh 'buildah push darinpope/jenkins-example-buildah:8.5-230'
-          sh 'buildah push darinpope/jenkins-example-buildah:latest'
+          sh 'buildah push praveenhpk/jenkins-example-buildah:8.5-230'
+          sh 'buildah push praveenhpk/jenkins-example-buildah:latest'
         }
       }
     }
